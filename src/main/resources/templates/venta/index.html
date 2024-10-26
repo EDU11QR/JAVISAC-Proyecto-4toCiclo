@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Sistema de Ventas</title>
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+	
+	<header th:replace="layout/layout :: header"></header>
+	
+	<div class="container mt-4">
+		<div class="row">
+			<div class="col-12 text-center">
+				<h2>VENTAS JAVISAC</h2>
+			</div>
+		</div>
+
+		<div class="row mt-4">
+			<!-- Datos Cliente -->
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-header">
+						<h5>Datos Cliente</h5>
+					</div>
+					<div class="card-body">
+						<form th:action="@{/venta/buscarcliente}" method="get" onsubmit="return validarCodigo('codigoCliente', 'codigoClienteError')">
+							<div class="form-group">
+								<label for="codigoCliente">Código</label>
+								<div class="input-group">
+									<input type="text" class="form-control" id="codigoCliente" name="idCcliuente"
+										 placeholder="Código" required>
+									<div class="input-group-append">
+										<button class="btn btn-outline-secondary" type="submit">Buscar</button>
+									</div>
+								</div>
+								<small id="codigoClienteError" class="form-text text-danger d-none">Debe ingresar el código del cliente.</small>
+							</div>
+						</form>
+						<div class="form-group">
+							<label for="nombreCliente">Nombre</label>
+							<input type="text" class="form-control" id="nombreCliente"
+								placeholder="Nombres" th:value="${venta.empleado?.nombre}" readonly>
+						</div>
+					</div>
+				</div>
+
+				<!-- Datos Producto -->
+				<div class="card mt-4">
+					<div class="card-header">
+						<h5>Datos Producto</h5>
+					</div>
+					<div class="card-body">
+						<form th:action="@{/venta/buscarProducto}" method="get" onsubmit="return validarCodigo('codigoProducto', 'codigoProductoError')">
+							<div class="form-group">
+								<label for="codigoProducto">Código</label>
+								<div class="input-group">
+									<input type="text" class="form-control" id="codigoProducto" name="idProducto"
+										th:value="${prodicut?.idp}" placeholder="Código" required>
+									<div class="input-group-append">
+										<button class="btn btn-outline-secondary" type="submit">Buscar</button>
+									</div>
+								</div>
+								<small id="codigoProductoError" class="form-text text-danger d-none">Debe ingresar el código del producto.</small>
+							</div>
+						</form>
+						<div class="form-group">
+							<label for="nombreProducto">Producto</label>
+							<input type="text" class="form-control" id="nombreProducto" placeholder="Producto"
+								th:value="${prodicut?.nombrep}" readonly>
+						</div>
+						<div class="form-group">
+							<label for="precioProducto">Precio</label>
+							<input type="number" class="form-control" id="precioProducto"
+								th:value="${prodicut?.preciop}" readonly>
+						</div>
+						<form th:action="@{/venta/agregar}" method="get">
+							<div class="form-group">
+								<label for="cantidadProducto">Cantidad</label>
+								<input type="number" class="form-control" id="cantidadProducto" name="cantidad"
+									value="1">
+								<input type="hidden" name="idProducto" th:value="${prodicut?.idp}">
+							</div>
+							<button class="btn btn-primary btn-block" type="submit">Agregar Producto</button>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<!-- Detalle Venta -->
+			<div class="col-md-8">
+				<div class="card">
+					<div class="card-header d-flex justify-content-between">
+						<h5>Detalle Venta</h5>
+					</div>
+					<div class="card-body">
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>NRO</th>
+									<th>PRODUCTO</th>
+									<th>COD</th>
+									<th>PRECIO</th>
+									<th>CANT</th>
+									<th>TOTAL</th>
+									<th>ACCIONES</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="detalle, iterStat : ${venta.detalleVentaList}">
+									<td th:text="${iterStat.count}"></td>
+									<td th:text="${detalle.producto.nombrep}"></td>
+									<td th:text="${detalle.producto.idp}"></td>
+									<td th:text="${detalle.preDetVenta}"></td>
+									<td th:text="${detalle.cantDetVenta}"></td>
+									<td th:text="${detalle.montoDetVenta}"></td>
+									<td>
+										<a th:href="@{/venta/eliminar(idProducto=${detalle.producto.idp})}"
+											class="btn btn-danger btn-sm">X</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="card-footer text-right">
+						<h4>Total a Pagar: <strong>S/. <span th:text="${montoTotal}">1020.00</span></strong></h4>
+						<form th:action="@{/venta/generarventa}" method="get">
+							<button class="btn btn-success" type="submit">Generar Venta</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		function validarCodigo(inputId, errorId) {
+			const codigo = document.getElementById(inputId).value.trim();
+			const errorMsg = document.getElementById(errorId);
+
+			if (codigo === '') {
+				errorMsg.classList.remove('d-none');
+				return false; // Evita el envío del formulario
+			} else {
+				errorMsg.classList.add('d-none');
+				return true; // Permite el envío
+			}
+		}
+	</script>
+	<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
